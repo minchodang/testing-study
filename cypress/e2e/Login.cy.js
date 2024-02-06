@@ -25,13 +25,8 @@ it('회원 가입 클릭 시 회원 가입 페이지로 이동한다', () => {
 });
 
 it('성공적으로 로그인 되었을 경우 메인 홈 페이지로 이동하며, 사용자 이름 "Maria"와 장바구니 아이콘이 노출된다', () => {
-  const username = 'maria@mail.com';
-  const password = '12345';
-
-  cy.findAllByLabelText('이메일').type(username);
-  cy.findAllByLabelText('비밀번호').type(password);
-  cy.findAllByLabelText('로그인').click();
-  cy.url().should('eq', `${Cypress.env('baseUrl')}/`);
+  cy.login();
+  cy.assertUrl('/');
   cy.findByText('Maria').should('exist');
   cy.findByTestId('cart-icon').should('exist');
 });
