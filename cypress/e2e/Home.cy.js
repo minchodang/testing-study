@@ -1,20 +1,61 @@
-it('초기 상품은 20개가 노출된다', () => {});
+before(() => {
+  cy.visit('/');
+});
 
-it('show more 버튼을 클릭할 경우 상품이 20개 더 노출된다', () => {});
+const assertProductCardLength = length => {
+  cy.findAllByTestId('product-card').should('have.length', length);
+};
+
+it('초기 상품은 20개가 노출된다', () => {
+  cy.findAllByTestId('product-card').should('have.length', 20);
+});
+
+it('show more 버튼을 클릭할 경우 상품이 20개 더 노출된다', () => {
+  cy.findByText('Show more').click();
+  assertProductCardLength(40);
+});
 
 describe('장바구니 / 구매 버튼', () => {
   describe('로그인을 하지 않은 경우', () => {
-    it('장바구니 버튼 클릭 시 로그인 페이지로 이동한다', () => {});
+    it('장바구니 버튼 클릭 시 로그인 페이지로 이동한다', () => {
+      cy.getProductCardByIndex(0).findByText('장바구니').click();
+      cy.assertUrl('/login');
+    });
 
-    it('구매 버튼 클릭 시 로그인 페이지로 이동한다', () => {});
+    it('구매 버튼 클릭 시 로그인 페이지로 이동한다', () => {
+      cy.getProductCardByIndex(0).findByText('구매').click();
+      cy.assertUrl('/login');
+    });
   });
 
   describe('로그인 시', () => {
-    it('장바구니에 아무것도 추가하지 않은 경우 장바구니 아이콘 뱃지에 숫자가 노출되지 않는다', () => {});
+    beforeEach(() => {
+      cy.login();
+    });
+    it('장바구니에 아무것도 추가하지 않은 경우 장바구니 아이콘 뱃지에 숫자가 노출되지 않는다', () => {
+      cy.getCartButton().should('have.text', '');
+    });
 
-    it('장바구니 버튼 클릭 시 "장바구니 추가 완료!" 알림 메세지가 노출되며, 장바구니에 담긴 수량도 증가한다', () => {});
+    it('장바구니 버튼 클릭 시 "장바구니 추가 완료!" 알림 메세지가 노출되며, 장바구니에 담긴 수량도 증가한다', () => {
+      cy.getProductCardByIndex(0).findByText('장바구니').click();
 
-    it('구매 버튼 클릭시 해당 아이템이 장바구니에 추가되며, 장바구니 페이지로 이동한다', () => {});
+      cy.findByText('Handmade Cotton Fish 장바구니 추가 완료!').should('exist');
+      cy.getCartButton().should('have.text', 1);
+      cy.getProductCardByIndex(0).findByText('장바구니').click();
+
+      cy.findByText('Awesome Concrete Shirt 장바구니 추가 완료!').should(
+        'exist',
+      );
+      cy.getCartButton().should('have.text', 2);
+    });
+
+    it('구매 버튼 클릭시 해당 아이템이 장바구니에 추가되며, 장바구니 페이지로 이동한다', () => {
+      cy.getProductCardByIndex(0).findByText('구매').click();
+
+      cy.assertUrl('/cart');
+      cy.getCartButton().should('have.text', '1');
+      cy.findByText('Handmade Cotton Fish').should('exist');
+    });
   });
 });
 
